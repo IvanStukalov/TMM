@@ -1,0 +1,13 @@
+{
+  "name": "ml_service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true,
+  "dependencies": {
+    "ws": "^8.17.0"
+  }
+}
