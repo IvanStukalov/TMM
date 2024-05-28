@@ -7,6 +7,7 @@ from imutils import face_utils
 import math
 import base64
 from flask import Flask, render_template
+import json
 
 app = Flask(__name__)
 
@@ -55,6 +56,8 @@ async def process_video(websocket, path):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         rects = detector(gray, 0)
 
+        eyeClose = False
+
         for (i, rect) in enumerate(rects):
             shape = predictor(gray, rect)
             shape = face_utils.shape_to_np(shape)
@@ -67,12 +70,22 @@ async def process_video(websocket, path):
                 cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
 
             if blink_ratio > BLINK_RATIO_THRESHOLD:
-                cv2.putText(image, "BLINKING", (10, 50), cv2.FONT_HERSHEY_SIMPLEX,
-                            2, (255, 255, 255), 2, cv2.LINE_AA)
+                eyeClose = True
 
         _, buffer = cv2.imencode('.jpg', image)
         frame = base64.b64encode(buffer).decode('utf-8')
-        await websocket.send(f"data:image/jpeg;base64,{frame}")
+        # Создание словаря с данными для отправки
+        data_to_send = {
+            "image": f"data:image/jpeg;base64,{frame}",
+            "eyeClose": eyeClose,
+        }
+
+        # Преобразование словаря в JSON строку
+        json_data = json.dumps(data_to_send)
+
+        # Отправка JSON строки через веб-сокет
+        await websocket.send(json_data)
+
 
 start_server = websockets.serve(process_video, HOST, 8080)
 
