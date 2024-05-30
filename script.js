@@ -21,17 +21,6 @@ const host = "192.168.244.153";
 
 const serverUrl = `ws://${host}:8080`;
 
-async function startVideo() {
-  try {
-    console.log("navigator", navigator)
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
-    startStreaming();
-  } catch (error) {
-    console.error('Error accessing camera:', error);
-  }
-}
-
 function startStreaming() {
   let closed = false;
   const timeFrame = [];
@@ -57,9 +46,9 @@ function startStreaming() {
    * }
    */
   websocket.onmessage = (event) => {
-    const data = JSON.parse(event.data) 
+    const data = JSON.parse(event.data)
     output.src = data.image;
-    
+
     const currentTime = new Date();
     if (closed && !data.eyeClose) {
       console.log("BLINK")
@@ -79,17 +68,13 @@ function startStreaming() {
     blinkFreqDiv.textContent = `${freq} в ${FRAME_WIDTH} сек`;
   };
 
-  video.addEventListener('play', () => {
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    setInterval(() => {
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = canvas.toDataURL('image/jpeg');
-      if (websocket.readyState === WebSocket.OPEN) {
-        websocket.send(imageData);
-      }
-    }, 100); // Отправка каждые 100ms
-  });
+  setInterval(() => {
+    if (websocket.readyState === WebSocket.OPEN) {
+      console.log("aaaaa")
+      
+      websocket.send("aaaaa");
+    }
+  }, 100); // Отправка каждые 100ms
 }
 
-startVideo();
+startStreaming();

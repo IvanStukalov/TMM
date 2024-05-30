@@ -47,12 +47,11 @@ def index():
     return render_template('index.html')
 
 async def process_video(websocket, path):
-    async for message in websocket:
-        # Декодирование полученного изображения
-        data = base64.b64decode(message.split(",")[1])
-        np_data = np.fromstring(data, np.uint8)
-        image = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
+    cap = cv2.VideoCapture(0)
 
+    while True:
+        # Декодирование полученного изображения
+        res,image = cap.read()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         rects = detector(gray, 0)
 
@@ -90,6 +89,7 @@ async def process_video(websocket, path):
 start_server = websockets.serve(process_video, HOST, 8080)
 
 if __name__ == '__main__':
+    print("start")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_server)
     loop.run_forever()
